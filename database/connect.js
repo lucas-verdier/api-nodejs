@@ -5,7 +5,6 @@ let client = null;
 function connection(url, callback) {
     if (client === null) {
         client = new MongoClient(url);
-
         client.connect((err) => {
             if(err) {
                 client = null;
