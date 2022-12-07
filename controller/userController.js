@@ -1,6 +1,7 @@
 const { User } = require('../model/User');
 const client = require('../database/connect');
 const {ObjectId} = require("mongodb");
+
 const insertUser = async (req, res) => {
     try {
         let user = new User(
@@ -43,6 +44,18 @@ const getOneUserById = async (req, res) => {
     }
 }
 
+const getUsersByGroup = async (req, res) => {
+    try {
+        let id = req.params.id;
+        let cursor = client.db().collection("users").find({groupId : id});
+        let result = await cursor.toArray();
+        result.length > 0 ? res.status(200).json(result) : res.status(204).json({msg: "Aucun utilisateur trouvé"});
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+}
+
 const deleteUser = async (req, res) => {
     try {
         let id = new ObjectId(req.params.id);
@@ -56,11 +69,11 @@ const deleteUser = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        let email = new ObjectId(req.params.email);
-        let password = new ObjectId(req.params.password);
+        let email = req.params.email;
+        let password = req.params.password;
         let cursor = client.db().collection("users").find({email: email, password: password});
         let result = await cursor.toArray();
-        if (result.length > 0) {
+        if (result.length === 0) {
             res.status(200).json(result);
             console.log('Utilisateur connecté');
         } else {
@@ -72,4 +85,4 @@ const login = async (req, res) => {
     }
 }
 
-module.exports = { insertUser, getAllUsers, getOneUserById, login, deleteUser };
+module.exports = { insertUser, getAllUsers, getOneUserById, login, deleteUser, getUsersByGroup };
